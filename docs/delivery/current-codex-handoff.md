@@ -11,7 +11,7 @@ concluídas a partir da conversa antiga.
 - Últimos commits funcionais: `1a865e9` (edição/reordenação por refeição e
   refinamentos de UX), `cd1866a` (presets corrigidos para refeições individuais)
   e `e70e946` (workspace de alimentação Trainer).
-- Stack: .NET 10, EF Core/PostgreSQL, Expo/React Native/Expo Router, TypeScript,
+- Stack: .NET 10, EF Core/PostgreSQL, Expo SDK 57/React Native/Expo Router, TypeScript,
   TanStack Query, Zustand e SQLite offline.
 - APIs públicas:
   - Student: `https://student-api-production-a4fe.up.railway.app`

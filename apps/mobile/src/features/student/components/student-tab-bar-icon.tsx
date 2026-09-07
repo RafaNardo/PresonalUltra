@@ -1,6 +1,6 @@
 import Ionicons from '@expo/vector-icons/Ionicons';
 import type { ComponentProps } from 'react';
-import { StyleSheet, View } from 'react-native';
+import { StyleSheet, View, type ColorValue } from 'react-native';
 import { colors, radius } from '@/src/design/tokens';
 
 type IconName = ComponentProps<typeof Ionicons>['name'];
@@ -9,7 +9,7 @@ type StudentTabBarIconProps = {
   active: IconName;
   inactive: IconName;
   focused: boolean;
-  color: string;
+  color: ColorValue;
 };
 
 export function StudentTabBarIcon({ active, inactive, focused, color }: StudentTabBarIconProps) {

@@ -77,6 +77,6 @@ async function cachedImageSource(imageRef: string): Promise<ImageSource | undefi
 
 const styles = StyleSheet.create({
   frame: { overflow: 'hidden', backgroundColor: colors.surfaceElevated },
-  placeholder: { ...StyleSheet.absoluteFillObject, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceElevated },
+  placeholder: { ...StyleSheet.absoluteFill, alignItems: 'center', justifyContent: 'center', backgroundColor: colors.surfaceElevated },
   placeholderText: { ...typography.headingMD, color: colors.textMuted, letterSpacing: 1 },
 });
