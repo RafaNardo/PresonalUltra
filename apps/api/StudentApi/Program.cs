@@ -58,7 +58,6 @@ app.MapPersonalUltraApi();
 app.MapStudentInviteApi();
 app.MapAnamnesisApi();
 app.MapStudentMessageApi();
-app.MapChatApi();
 app.MapTrainingApi();
 app.MapNutritionProgressApi();
 app.MapBrandingApi();

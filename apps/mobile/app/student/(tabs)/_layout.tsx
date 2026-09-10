@@ -28,7 +28,7 @@ export default function StudentTabsLayout() {
       <Tabs.Screen name="training" options={{ title: 'Treino', tabBarIcon: (props) => <StudentTabBarIcon {...props} active="barbell" inactive="barbell-outline" /> }} />
       <Tabs.Screen name="nutrition" options={{ title: 'Nutrição', tabBarIcon: (props) => <StudentTabBarIcon {...props} active="restaurant" inactive="restaurant-outline" /> }} />
       <Tabs.Screen name="progress" options={{ title: 'Progresso', tabBarIcon: (props) => <StudentTabBarIcon {...props} active="trending-up" inactive="trending-up-outline" /> }} />
-      <Tabs.Screen name="chat" options={{ title: 'Chat', tabBarIcon: (props) => <StudentTabBarIcon {...props} active="chatbubble" inactive="chatbubble-outline" /> }} />
+      <Tabs.Screen name="profile" options={{ title: 'Perfil', tabBarIcon: (props) => <StudentTabBarIcon {...props} active="person" inactive="person-outline" /> }} />
     </Tabs>
   );
 }

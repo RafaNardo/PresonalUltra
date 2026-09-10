@@ -10,7 +10,7 @@ export type AnalyticsEvent =
   | 'pain_reported'
   | 'weight_logged';
 
-// Ponto único de integração: nenhum dado de saúde ou conteúdo do chat é enviado.
+// Ponto único de integração: nenhum dado de saúde é enviado.
 // Um provedor (Sentry/analytics) pode ser conectado aqui quando houver credenciais de produção.
 export const telemetry = {
   event(name: AnalyticsEvent, properties: EventProperties = {}) { if (__DEV__) console.info(`[analytics] ${name}`, properties); },

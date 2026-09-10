@@ -1,5 +1,4 @@
 import { router, useLocalSearchParams } from 'expo-router';
-import { useIsFocused } from '@react-navigation/native';
 import { useEffect, useState } from 'react';
 import { useMutation, useQuery } from '@tanstack/react-query';
 import { Alert, Linking, Pressable, StyleSheet, Text, TextInput, View } from 'react-native';
@@ -10,18 +9,16 @@ import { useCreateTrainerMessage, useTrainerAnamnesis, useTrainerStudent } from 
 import { useReorderTrainerStudentWorkouts, useTrainerStudentWorkouts } from '@/src/features/trainer/training/hooks';
 import { feedback } from '@/src/platform/feedback';
 import { trainerClient } from '@/src/api/trainer-client';
-import type { TrainerChatMessage, TrainerNutrition, TrainerNutritionMeal } from '@/src/api/trainer-client';
+import type { TrainerNutrition, TrainerNutritionMeal } from '@/src/api/trainer-client';
 import { useSaveTrainerNutrition, useTrainerNutrition } from '@/src/features/trainer/nutrition/hooks';
 import { formatNutritionQuantity } from '@/src/shared/nutrition';
 
-type StudentSection = 'summary' | 'training' | 'nutrition' | 'chat';
+type StudentSection = 'summary' | 'training' | 'nutrition';
 
 export default function TrainerStudentDetailScreen() {
   const { id, section: initialSection } = useLocalSearchParams<{ id: string; section?: StudentSection }>();
-  const isFocused = useIsFocused();
   const [section, setSection] = useState<StudentSection>(initialSection ?? 'summary');
   const [message, setMessage] = useState('');
-  const [chatContent, setChatContent] = useState('');
   const student = useTrainerStudent(id);
   const createMessage = useCreateTrainerMessage(id);
   const anamnesis = useTrainerAnamnesis(id, student.data?.anamnesisStatus === 'Completed');
@@ -31,8 +28,6 @@ export default function TrainerStudentDetailScreen() {
   const nutrition = useTrainerNutrition(id ?? '');
   const saveNutrition = useSaveTrainerNutrition(id ?? '');
   const weight = useQuery({ queryKey: ['trainer', 'students', id, 'weight'], queryFn: () => trainerClient.weight(id!), enabled: Boolean(id) });
-  const chat = useQuery({ queryKey: ['trainer', 'students', id, 'chat'], queryFn: () => trainerClient.chat(id!), enabled: Boolean(id) && section === 'chat' && isFocused, refetchInterval: section === 'chat' && isFocused ? 20_000 : false });
-  const sendChat = useMutation({ mutationFn: () => trainerClient.sendChatMessage(id!, chatContent.trim()), onSuccess: () => { setChatContent(''); void chat.refetch(); } });
 
   useEffect(() => { if (initialSection) setSection(initialSection); }, [initialSection]);
 
@@ -58,7 +53,6 @@ export default function TrainerStudentDetailScreen() {
       <StudentTab label="Resumo" selected={section === 'summary'} onPress={() => setSection('summary')} />
       <StudentTab label="Treinos" selected={section === 'training'} onPress={() => setSection('training')} />
       <StudentTab label="Alimentação" selected={section === 'nutrition'} onPress={() => setSection('nutrition')} />
-      <StudentTab label="Chat" selected={section === 'chat'} onPress={() => setSection('chat')} />
     </View>
 
     {section === 'summary' && <>
@@ -108,12 +102,6 @@ export default function TrainerStudentDetailScreen() {
       </Card>
     </>}
 
-    {section === 'chat' && <>
-      <View style={styles.sectionHeader}><View><Text style={styles.sectionTitle}>Chat com {data.firstName}</Text><Text style={styles.copy}>A conversa é atualizada enquanto esta seção estiver aberta.</Text></View></View>
-      {chat.isLoading ? <Card><Text style={styles.copy}>Carregando conversa…</Text></Card> : chat.isError ? <Card style={styles.card}><Text style={styles.errorText}>Não foi possível carregar o chat.</Text><Button variant="secondary" onPress={() => chat.refetch()}>Tentar novamente</Button></Card> : !chat.data?.length ? <EmptyState status="CONVERSA ABERTA" title="Ainda não há mensagens." message={`${data.firstName} poderá iniciar uma conversa pelo app, ou você pode enviar a primeira mensagem abaixo.`} /> : <View style={styles.chatMessages}>{chat.data.map((item) => <ChatMessageRow key={item.id} message={item} />)}</View>}
-      <Card style={styles.card}><TextInput value={chatContent} onChangeText={setChatContent} multiline maxLength={1000} placeholder={`Mensagem para ${data.firstName}`} placeholderTextColor={colors.textMuted} accessibilityLabel={`Mensagem para ${data.firstName}`} style={styles.input} /><Button loading={sendChat.isPending} disabled={!chatContent.trim()} onPress={() => sendChat.mutate()}>Enviar no chat</Button></Card>
-    </>}
-
     {section === 'nutrition' && <>
       <View style={styles.sectionHeader}><View><Text style={styles.sectionTitle}>Alimentação atual</Text><Text style={styles.copy}>Organize as refeições e disponibilize a versão mais recente para {data.firstName}.</Text></View></View>
       {nutrition.isLoading ? <Card><Text style={styles.copy}>Carregando alimentação…</Text></Card> : nutrition.isError ? <Card style={styles.card}><Text style={styles.errorText}>Não foi possível carregar a alimentação.</Text><Button variant="secondary" onPress={() => nutrition.refetch()}>Tentar novamente</Button></Card> : !nutrition.data ? <EmptyState status="ALIMENTAÇÃO PENDENTE" symbol="+" title="Prepare a primeira alimentação deste aluno." message="Escolha um preset ou comece do zero e revise tudo antes de disponibilizar." actionLabel="Adicionar alimentação" onAction={() => router.push({ pathname: '/trainer/students/[studentId]/nutrition/add', params: { studentId: id! } })} /> : <>
@@ -134,8 +122,6 @@ export default function TrainerStudentDetailScreen() {
 function StudentTab({ label, selected, onPress }: { label: string; selected: boolean; onPress: () => void }) {
   return <Pressable accessibilityRole="tab" accessibilityState={{ selected }} onPress={onPress} style={[styles.tab, selected && styles.tabSelected]}><Text style={[styles.tabText, selected && styles.tabTextSelected]}>{label}</Text></Pressable>;
 }
-
-function ChatMessageRow({ message }: { message: TrainerChatMessage }) { const mine = message.sender === 'Trainer'; return <View style={[styles.chatMessage, mine ? styles.chatMessageMine : styles.chatMessageStudent]}><Text style={styles.chatSender}>{mine ? 'VOCÊ' : 'ALUNO'}</Text><Text style={styles.chatContent}>{message.content}</Text><Text style={styles.chatDate}>{new Intl.DateTimeFormat('pt-BR', { dateStyle: 'short', timeStyle: 'short' }).format(new Date(message.createdAt))}</Text></View>; }
 
 function WorkoutOrderItem({ workout, index, count, busy, onMove, onPress }: { workout: { id: string; name: string; notes: string; exerciseCount: number }; index: number; count: number; busy: boolean; onMove: (to: number) => void; onPress: () => void }) {
   return <Card style={styles.workoutItem}>

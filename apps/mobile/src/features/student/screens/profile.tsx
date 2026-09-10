@@ -8,7 +8,7 @@ import { colors, radius, spacing, typography } from '@/src/design/tokens';
 import { inviteApi } from '@/src/features/student/invite/api';
 import { useInviteSessionStore } from '@/src/features/student/invite/session-store';
 
-export function StudentProfileScreen() {
+export function StudentProfileScreen({ withinTabs = false }: { withinTabs?: boolean }) {
   const session = useInviteSessionStore((state) => state.session); const clear = useInviteSessionStore((state) => state.clear); const client = useQueryClient();
   const [preferredName, setPreferredName] = useState('');
   const profile = useQuery({ queryKey: ['student', session?.studentId, 'profile'], queryFn: () => inviteApi.profile(session!.accessToken), enabled: Boolean(session) });
@@ -18,7 +18,7 @@ export function StudentProfileScreen() {
   if (profile.isLoading) return <LoadingView message="Carregando seu perfil…" />;
   if (profile.isError) return <ErrorView message={profile.error.message} onRetry={() => profile.refetch()} />;
   const data = profile.data!;
-  return <Screen style={styles.page}><TopBar eyebrow="MEU PERFIL" title="Meu perfil" onBack={() => router.back()} />
+  return <Screen withinTabs={withinTabs} style={styles.page}><TopBar eyebrow="MEU PERFIL" title="Meu perfil" onBack={withinTabs ? undefined : () => router.back()} />
     <Card style={styles.card}><Text style={styles.eyebrow}>COMO VOCÊ QUER SER CHAMADO(A)</Text><Text style={styles.title}>Nome no app</Text><Text style={styles.copy}>Usaremos este nome nas suas telas. Seu cadastro com o personal não é alterado.</Text><TextInput value={preferredName} onChangeText={setPreferredName} placeholder={data.firstName} placeholderTextColor={colors.textMuted} maxLength={100} style={styles.input} /><Button loading={save.isPending} onPress={() => save.mutate()}>Salvar nome</Button></Card>
     <Card style={styles.card}><Text style={styles.eyebrow}>DADOS CADASTRAIS</Text><ProfileField label="Nome cadastrado" value={`${data.firstName} ${data.lastName}`.trim()} /><ProfileField label="E-mail" value={data.email} /><ProfileField label="Telefone" value={data.phone} /></Card>
     <View style={styles.actions}><Button variant="secondary" onPress={() => { clear(); router.replace('/demo-role-switch'); }}>Trocar contexto demo</Button><Button variant="ghost" onPress={() => { clear(); router.replace('/login'); }}>Sair</Button></View>
